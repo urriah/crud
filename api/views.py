@@ -1,82 +1,82 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import NoteSerializer
-from .models import Note
+from .serializers import BuildSerializer
+from .models import Build
 
 @api_view(['GET'])
 def getRoutes(request):
     routes = [
         {
-            'Endpoint': '/notes/',
+            'Endpoint': '/builds/',
             'method': 'GET',
             'body': None,
-            'description': 'Returns an array of notes'
+            'description': 'Returns an array of builds'
         },
         {
-            'Endpoint': '/notes/id',
+            'Endpoint': '/builds/id',
             'method': 'GET',
             'body': None,
-            'description': 'Returns a single note object'
+            'description': 'Returns a single build object'
         },
         {
-            'Endpoint': '/notes/create',
+            'Endpoint': '/builds/create',
             'method': 'POST',
             'body': {'body':""},
-            'description': 'Creates new note with data sent in post request'
+            'description': 'Creates new build with data sent in post request'
         },
         {
-            'Endpoint': '/notes/id/update',
+            'Endpoint': '/builds/id/update',
             'method': 'PUT',
             'body': {'body':""},
-            'description': 'Creates an existing note with data sent in put request'
+            'description': 'Creates an existing build with data sent in put request'
         },
         {
-            'Endpoint': '/notes/id/delete',
+            'Endpoint': '/builds/id/delete',
             'method': 'DELETE',
             'body': None,
-            'description': 'Deletes and exiting note'
+            'description': 'Deletes and exiting build'
         },
     ]
     return Response(routes)
 
 
 @api_view(['GET'])
-def getNotes(request):
-    notes = Note.objects.all()
-    serializer = NoteSerializer(notes, many=True)
+def getBuilds(request):
+    builds = Build.objects.all()
+    serializer = BuildSerializer(builds, many=True)
     return Response(serializer.data)
 
 
 @api_view(['GET'])
-def getNote(request, pk):
-    note = Note.objects.get(id=pk)
-    serializer = NoteSerializer(note, many=False)
+def getBuild(request, pk):
+    build = Build.objects.get(id=pk)
+    serializer = BuildSerializer(build, many=False)
     return Response(serializer.data)
 
 
 @api_view(['POST'])
-def createNote(request): 
+def createBuild(request): 
     data = request.data
 
-    note = Note.objects.create(
+    build = Build.objects.create(
         body=data['body']
     )
-    serializer = NoteSerializer(note, many=False)
+    serializer = BuildSerializer(build, many=False)
     return Response(serializer.data)
 
 @api_view(['PUT'])
-def updateNote(request, pk): 
+def updateBuild(request, pk): 
     data = request.data
 
-    note = Note.objects.get(id=pk)
-    serializer = NoteSerializer(note, data=request.data)
+    build = Build.objects.get(id=pk)
+    serializer = BuildSerializer(build, data=request.data)
     if serializer.is_valid():
         serializer.save()
 
     return Response(serializer.data)
 
 @api_view(['DELETE'])
-def deleteNote(request, pk):
-    note = Note.objects.get(id=pk)
-    note.delete()
-    return Response('Note was deteled')
+def deleteBuild(request, pk):
+    build = Build.objects.get(id=pk)
+    build.delete()
+    return Response('Build was deteled')
