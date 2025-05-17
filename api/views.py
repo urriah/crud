@@ -1,5 +1,8 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
+from django.http import Http404
 from .serializers import BuildSerializer
 from .models import Build
 
@@ -21,62 +24,76 @@ def getRoutes(request):
         {
             'Endpoint': '/builds/create',
             'method': 'POST',
-            'body': {'body':""},
-            'description': 'Creates new build with data sent in post request'
+            'body': {'name': "", 'components': {}},
+            'description': 'Creates a new build with data sent in post request'
         },
         {
             'Endpoint': '/builds/id/update',
             'method': 'PUT',
-            'body': {'body':""},
-            'description': 'Creates an existing build with data sent in put request'
+            'body': {'name': "", 'components': {}},
+            'description': 'Updates an existing build with data sent in put request'
         },
         {
             'Endpoint': '/builds/id/delete',
             'method': 'DELETE',
             'body': None,
-            'description': 'Deletes and exiting build'
+            'description': 'Deletes an existing build'
         },
     ]
     return Response(routes)
 
-
 @api_view(['GET'])
 def getBuilds(request):
     builds = Build.objects.all()
-    serializer = BuildSerializer(builds, many=True)
-    return Response(serializer.data)
-
+    paginator = PageNumberPagination()
+    paginated_builds = paginator.paginate_queryset(builds, request)
+    serializer = BuildSerializer(paginated_builds, many=True)
+    return paginator.get_paginated_response(serializer.data)
 
 @api_view(['GET'])
 def getBuild(request, pk):
-    build = Build.objects.get(id=pk)
+    try:
+        build = Build.objects.get(id=pk)
+    except Build.DoesNotExist:
+        raise Http404("Build not found")
     serializer = BuildSerializer(build, many=False)
     return Response(serializer.data)
-
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def createBuild(request): 
     data = request.data
+    if 'name' not in data or 'components' not in data:
+        return Response({'error': 'Name and components are required'}, status=400)
 
     build = Build.objects.create(
-        body=data['body']
+        name=data['name'],
+        components=data['components']
     )
     serializer = BuildSerializer(build, many=False)
-    return Response(serializer.data)
+    return Response(serializer.data, status=201)
 
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated])
 def updateBuild(request, pk): 
-    data = request.data
+    try:
+        build = Build.objects.get(id=pk)
+    except Build.DoesNotExist:
+        return Response({'error': 'Build not found'}, status=404)
 
-    build = Build.objects.get(id=pk)
     serializer = BuildSerializer(build, data=request.data)
     if serializer.is_valid():
         serializer.save()
-
-    return Response(serializer.data)
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def deleteBuild(request, pk):
-    build = Build.objects.get(id=pk)
-    build.delete()
-    return Response('Build was deteled')
+    try:
+        build = Build.objects.get(id=pk)
+        build.delete()
+        return Response({'message': 'Build was deleted successfully'}, status=204)
+    except Build.DoesNotExist:
+        return Response({'error': 'Build not found'}, status=404)
+    
