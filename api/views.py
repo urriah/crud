@@ -45,10 +45,8 @@ def getRoutes(request):
 @api_view(['GET'])
 def getBuilds(request):
     builds = Build.objects.all()
-    paginator = PageNumberPagination()
-    paginated_builds = paginator.paginate_queryset(builds, request)
-    serializer = BuildSerializer(paginated_builds, many=True)
-    return paginator.get_paginated_response(serializer.data)
+    serializer = BuildSerializer(builds, many=True)
+    return Response(serializer.data)
 
 @api_view(['GET'])
 def getBuild(request, pk):
@@ -60,7 +58,7 @@ def getBuild(request, pk):
     return Response(serializer.data)
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def createBuild(request): 
     data = request.data
     if 'name' not in data or 'components' not in data:
@@ -74,7 +72,7 @@ def createBuild(request):
     return Response(serializer.data, status=201)
 
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def updateBuild(request, pk): 
     try:
         build = Build.objects.get(id=pk)
@@ -88,7 +86,7 @@ def updateBuild(request, pk):
     return Response(serializer.errors, status=400)
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def deleteBuild(request, pk):
     try:
         build = Build.objects.get(id=pk)

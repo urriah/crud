@@ -1,14 +1,14 @@
 from django.db import models
 
-# Create your models here.
-
 class Build(models.Model):
-    body = models.TextField()
+    name = models.CharField(max_length=255)
+    components = models.JSONField()  # Use TextField if not on Django 3.1+
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.body[0:50]
-    
+        return self.name
+
     class Meta:
         ordering = ['-updated']
+        
