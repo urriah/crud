@@ -26,9 +26,10 @@ SECRET_KEY = 'django-insecure-k_*uynvqpsry8v0a)5k9_q+x7cbwm!ail&b@0bo6n6q5x+1xa#
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'crud-mryv.onrender.com',  # Your Render domain
-    'localhost',               # For local development
-    '127.0.0.1',              # For local development
+    'crud-mryv.onrender.com',  # Your exact Render domain
+    '.onrender.com',           # Wildcard for all Render subdomains
+    'localhost',
+    '127.0.0.1',
 ]
 
 # Application definition
